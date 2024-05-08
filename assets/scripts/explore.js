@@ -1,43 +1,46 @@
 // explore.js
 
-import JSConfetti from './assets/scripts/js-confetti.browser.js';
-
 window.addEventListener('DOMContentLoaded', init);
 
 function init() {
-  const textArea = document.getElementById('text-to-speak');
+  const speechSynth = window.speechSynthesis;
+  const textInput = document.getElementById('text-to-speak');
   const voiceSelect = document.getElementById('voice-select');
   const speakButton = document.querySelector('button');
-  const jsConfetti = new JSConfetti();  // Instantiate the confetti library
+  const smileyImage = document.querySelector('#explore img');
 
-  speakButton.addEventListener('click', function() {
-    const text = textArea.value;
-    speakText(text, voiceSelect.value);
-    jsConfetti.addConfetti();  // Trigger confetti when the button is clicked
-  });
-
+  // Function to populate the list of voices
   function loadVoices() {
-    const voices = speechSynthesis.getVoices();
-    voices.forEach(voice => {
-      const option = document.createElement('option');
-      option.textContent = voice.name + ' (' + voice.lang + ')';
-      option.setAttribute('value', voice.name);
-      voiceSelect.appendChild(option);
-    });
+    const availableVoices = speechSynth.getVoices();
+    voiceSelect.innerHTML = availableVoices.map(voice => {
+      let label = `${voice.name} (${voice.lang})`;
+      if (voice.default) label += ' — DEFAULT';
+      return `<option value="${voice.name}" data-lang="${voice.lang}">${label}</option>`;
+    }).join('');
   }
 
-  // Load voices when available
-  if (speechSynthesis.onvoiceschanged !== undefined) {
-    speechSynthesis.onvoiceschanged = loadVoices;
+  // Load voices immediately if available or after they are loaded
+  if (speechSynth.onvoiceschanged !== undefined) {
+    speechSynth.onvoiceschanged = loadVoices;
   }
+  loadVoices();  // Initial call to populate voices
 
-  function speakText(text, voiceName) {
-    if (!speechSynthesis) {
-      console.error('Speech Synthesis API is not supported in this browser.');
-      return;
+  // Function to speak text
+  function speakText() {
+    if (textInput.value.trim() !== '') {
+      const utterance = new SpeechSynthesisUtterance(textInput.value);
+      const selectedVoiceName = voiceSelect.value;
+      utterance.voice = speechSynth.getVoices().find(voice => voice.name === selectedVoiceName);
+      utterance.onend = () => {
+        console.log('Finished speaking.');
+        smileyImage.src = "assets/images/smiling.png"; // Reset image after speaking
+      };
+
+      speechSynth.speak(utterance);
+      smileyImage.src = "assets/images/smiling-open.png"; // Change image when speaking
     }
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.voice = speechSynthesis.getVoices().find(voice => voice.name === voiceName);
-    speechSynthesis.speak(utterance);
   }
+
+  // Setup event listener for the button
+  speakButton.addEventListener('click', speakText);
 }
