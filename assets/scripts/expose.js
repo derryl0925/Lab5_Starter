@@ -3,59 +3,54 @@ window.addEventListener('DOMContentLoaded', init);
 
 function init() {
   const jsConfetti = new JSConfetti();
-  const hornSelect = document.getElementById("horn-select");
-  const image = document.querySelector("img");
-  const audio = document.querySelector("audio");
-  const playButton = document.querySelector("button");
-  const volumeIcon = document.querySelector("#volume-controls img");
-  const volumeSlider = document.getElementById("volume");
+  var hornSelect = document.getElementById("horn-select");
+  var image = document.querySelector("img");
+  var audio = document.querySelector("audio");
+  var playButton = document.querySelector("button");
+  var vol = document.querySelector("#volume-controls img");
+  var volSlider = document.getElementById("volume");
 
-  // Function to update the image and sound based on the horn selection
-  function updateHorn() {
-    const hornImages = {
-      "party-horn": "party-horn.svg",
-      "car-horn": "car-horn.svg",
-      "air-horn": "air-horn.svg"
-    };
-    const hornSounds = {
-      "party-horn": "party-horn.mp3",
-      "car-horn": "car-horn.mp3",
-      "air-horn": "air-horn.mp3"
-    };
-
-    const hornType = hornSelect.value;
-    image.src = hornImages[hornType] ? `assets/images/${hornImages[hornType]}` : "assets/images/no-image.png";
-    audio.src = hornSounds[hornType] ? `assets/audio/${hornSounds[hornType]}` : "";
-  }
-
-  // Function to adjust the volume icon based on slider position
-  function adjustVolumeIcon(volume) {
-    if (volume === 0) {
-      volumeIcon.src = "assets/icons/volume-level-0.svg";
-    } else if (volume < 0.33) {
-      volumeIcon.src = "assets/icons/volume-level-1.svg";
-    } else if (volume < 0.67) {
-      volumeIcon.src = "assets/icons/volume-level-2.svg";
-    } else {
-      volumeIcon.src = "assets/icons/volume-level-3.svg";
-    }
-  }
-
-  // Playing sound and trigger confetti on play button click
-  playButton.addEventListener("click", () => {
+  playButton.addEventListener("click", function() {
     audio.play();
     if (hornSelect.value === "party-horn") {
+      
       jsConfetti.addConfetti();
+    }
+  })
+  
+  hornSelect.addEventListener("change", function() {
+    if (hornSelect.value === "party-horn") {
+      image.src = "assets/images/party-horn.svg";
+      audio.src = "assets/audio/party-horn.mp3";
+    }
+    else if (hornSelect.value === "car-horn"){
+      image.src = "assets/images/car-horn.svg";
+      audio.src = "assets/audio/car-horn.mp3";
+    }
+    else if (hornSelect.value === "air-horn"){
+      image.src = "assets/images/air-horn.svg";
+      audio.src = "assets/audio/air-horn.mp3";
+    }
+    else {
+      image.src = "assets/images/no-image.png";
+      audio.src = "";
     }
   });
 
-  // Update horn sound and image when selection changes
-  hornSelect.addEventListener("change", updateHorn);
-
-  // Adjust the volume icon and audio volume when volume slider changes
-  volumeSlider.addEventListener("change", () => {
-    const volumeLevel = volumeSlider.value / 100;
-    audio.volume = volumeLevel;
-    adjustVolumeIcon(volumeLevel);
+  volSlider.addEventListener("change", function() {
+    audio.volume = document.getElementById("volume").value / 100;
+    if(audio.volume === 0) {
+      vol.src = "assets/icons/volume-level-0.svg";
+    }
+    else if(audio.volume >= 0.01 && audio.volume < 0.33) {
+      vol.src = "assets/icons/volume-level-1.svg";
+    }
+    else if(audio.volume >= 0.33 && audio.volume < 0.67) {
+      vol.src = "assets/icons/volume-level-2.svg";
+    }
+    else {
+      vol.src = "assets/icons/volume-level-3.svg";
+    }
   });
+
 }
